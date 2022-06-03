@@ -2,9 +2,9 @@ const puppeteer = require("puppeteer");
 const { foundTitle } = require("./lib/commands");
 let page;
 
+
 beforeEach(async () => {
   page = await browser.newPage();
-  await page.goto("https://github.com/team");
 });
 
 afterEach(() => {
@@ -12,6 +12,12 @@ afterEach(() => {
 });
 
 describe("Github page tests", () => {
+
+  beforeEach(async () => {
+    await page.goto("https://github.com/team");
+  });
+  
+
   test("The h1 header content'", async () => {
     const firstLink = await page.$("header div div a");
     await firstLink.click();
@@ -55,16 +61,30 @@ describe("Github another page tests", () => {
 
 
 describe("Netology page tests", () => {
+
+  beforeEach(async () => {
+    await page.goto("https://netology.ru/marketing", {timeout:100000});
+  }, 120000);
   
-  test.only("The h1 header content'", async () => {
-    //jest.setTimeout(60000);
-    page = await browser.newPage();
-    await page.goto("https://netology.ru/marketing", { timeout: 120000 });
-    const firstLink = page.$("header div div a");
+  test("The h1 header content'", async () => {
+    const firstLink = await page.$('header div div a');
     await firstLink.click();
-    page.setDefaultTimeout(60000);
     await page.waitForSelector('h1');
     const title2 = await page.title();
     expect(title2).toEqual('Нетология – курсы и обучение интернет-профессиям онлайн');
-  }, 120000);
+  });
+
+  test("The first link attribute", async () => {
+    const actual = await page.$eval("a", link => link.getAttribute('href') );
+    expect(actual).toEqual("/legal/24");
+  });
+
+  test("The page contains button", async () => {
+    const btnSelector = ".shared-components-Header--navigatorButton--g4i4W";
+    await page.waitForSelector(btnSelector, {
+      visible: true,
+    });
+    const actual = await page.$eval(btnSelector, link => link.textContent);
+    expect(actual).toContain("Каталог курсов")
+  });
 });
